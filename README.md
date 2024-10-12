@@ -10,12 +10,11 @@ client_id = ""  # 替换为你的 client_id
 email = ""  # 替换为你的邮箱
 refresh_token = ""  # 替换为你的 refresh_token
 ```
+对比源代码，新增前端以及自动识别功能
 ![image](https://github.com/user-attachments/assets/45cdc15b-c92d-4e34-9716-b58de3bfc33d)
 
 
 由于微软邮箱新机制，闪邮箱提供了refresh_token为用户提供登录邮箱的服务：[邮箱批发|-闪邮箱 (shanyouxiang.com)](https://shanyouxiang.com/)
-
-按图所示，将店铺提供的短效邮箱信息依次替换到代码变量内即可。
 
 ```
 闪邮箱提供的邮箱信息(此为举例参考):
