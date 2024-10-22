@@ -116,4 +116,7 @@ def get_verification():
     return jsonify(result)
 
 if __name__ == '__main__':
+    """
+    5000端口如果无法启动，请自行更改到可用端口号。
+    """
     app.run(host='0.0.0.0', port=5000, debug=True)
