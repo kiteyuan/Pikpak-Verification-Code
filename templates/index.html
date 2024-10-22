@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PikPak验证码获取器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        /* 样式保持不变 */
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: rgb(200,241,246);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+            position: relative;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: rgb(200,241,246);
+            color: #333;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: rgb(180,221,226);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .link {
+            position: absolute;
+            top: 10px;
+            background-color: rgba(200,241,246,0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #333;
+            font-size: 12px;
+        }
+        .source-link {
+            right: 10px;
+        }
+        .invite-link {
+            left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="https://github.com/kiteyuan/Pikpak-Verification-Code/tree/main" class="link source-link" target="_blank">作者源代码</a>
+        <h1>PikPak验证码获取器</h1>
+        <form id="verificationForm">
+            <textarea id="inputText" placeholder="自动识别(在此粘贴原始账号格式文本)" rows="4"></textarea>
+            <input type="text" id="client_id" placeholder="Client ID" required>
+            <input type="email" id="email" placeholder="邮箱" required>
+            <input type="text" id="refresh_token" placeholder="Refresh Token" required>
+            <button type="submit">获取验证码</button>
+            <button type="button" id="clearButton">重置输入框</button>
+        </form>
+        <div id="result"></div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#inputText').on('input', function() {
+                var text = $(this).val();
+                
+                // 分割文本，忽略由----分隔的部分
+                var parts = text.split(/----/);
+                
+                // 处理每个部分，提取需要的内容
+                var emailMatch, clientIdMatch, refreshTokenMatch;
+                parts.forEach(function(part) {
+                    // 清理每个部分的空格
+                    part = part.trim();
+
+                    // 使用正则表达式提取需要的内容
+                    if (!emailMatch) {
+                        emailMatch = part.match(/(?:邮箱：)?([^@\s]+@[^@\s]+\.[^@\s]+)/);
+                    }
+                    if (!clientIdMatch) {
+                        clientIdMatch = part.match(/(?:client_id：)?([a-f0-9-]{36})/);
+                    }
+                    if (!refreshTokenMatch) {
+                        refreshTokenMatch = part.match(/(?:refresh_token：)?(M\.[^\s]+)/);
+                    }
+                });
+
+                // 更新输入框
+                if (emailMatch) $('#email').val(emailMatch[1].trim());
+                if (clientIdMatch) $('#client_id').val(clientIdMatch[1].trim());
+                if (refreshTokenMatch) $('#refresh_token').val(refreshTokenMatch[1].trim());
+            });
+
+            $('#verificationForm').submit(function(e) {
+                e.preventDefault();
+                $('#result').text('处理中...');
+                $.ajax({
+                    url: '/get_verification',
+                    method: 'POST',
+                    data: {
+                        client_id: $('#client_id').val(),
+                        email: $('#email').val(),
+                        refresh_token: $('#refresh_token').val()
+                    },
+                    success: function(response) {
+                        if (response.code === 200 && response.verification_code) {
+                            $('#result').text(response.verification_code);
+                        } else {
+                            $('#result').text('获取失败：' + response.msg);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#result').text('错误: ' + error);
+                    }
+                });
+            });
+
+            // 清空输入框的功能
+            $('#clearButton').click(function() {
+                $('#inputText').val('');
+                $('#client_id').val('');
+                $('#email').val('');
+                $('#refresh_token').val('');
+                $('#result').text('');
+            });
+        });
+    </script>
+</body>
+</html>
